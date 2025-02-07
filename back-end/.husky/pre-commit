@@ -1,0 +1,19 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+echo "Commit started"
+
+echo "Formatting started ⚙️"
+dotnet CSharpier ./
+dotnet husky run --name dotnet-format-staged
+echo "Formatting finished ✅"
+
+echo "Build started 🏗️"
+dotnet build src/BlockchainModel.sln --no-restore
+echo "Build finished ✅"
+
+echo "Test started 🧪"
+dotnet test src/BlockchainModel.sln --no-restore
+echo "Test finished ✅"
+
+echo "Commit finished ✅"

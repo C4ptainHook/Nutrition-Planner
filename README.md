@@ -1,2 +1,3 @@
-# Virtual-quest
-INT 20H hackaton qualification
+# Nutrition planner
+
+Demo project for OAuth and MCP
