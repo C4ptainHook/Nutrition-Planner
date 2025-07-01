@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <UserSecretsId>b3e2196b-f23e-43f0-8962-086085be939e</UserSecretsId>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="Carter" Version="9.0.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="9.0.6" />
+        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.4" />
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.5" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.4" />
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+        <PackageReference Include="Riok.Mapperly" Version="4.3.0-next.2" />
+        <PackageReference Include="Scalar.AspNetCore" Version="2.5.3" />
+        <PackageReference Include="WolverineFx" Version="4.5.0" />
+    </ItemGroup>
+</Project>
