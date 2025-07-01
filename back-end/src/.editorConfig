@@ -17,6 +17,7 @@ csharp_style_pattern_matching_over_is_with_cast_check = true
 csharp_style_var_elsewhere = true
 csharp_style_var_for_built_in_types = true
 csharp_style_var_when_type_is_apparent = true
+csharp_style_prefer_primary_constructors = false
 
 [*.{cs,vb}]
 dotnet_diagnostic.CA1707.severity = none
@@ -64,6 +65,7 @@ dotnet_diagnostic.IDE0301.severity = warning
 dotnet_diagnostic.IDE0305.severity = none
 dotnet_diagnostic.IDE0330.severity = warning
 dotnet_diagnostic.IDE1006.severity = warning
+dotnet_diagnostic.IDE0290.severity = none
 
 dotnet_diagnostic.RS1035.severity = none
 dotnet_diagnostic.RS1042.severity = none
