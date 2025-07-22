@@ -2,7 +2,7 @@ using AuthService.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace AuthService.Persistence;
+namespace AuthService.Data;
 
 public class AuthDbContext : IdentityDbContext<ApplicationUser>
 {

@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 
-namespace AuthService.Persistence.Extensions;
+namespace AuthService.Data.Extensions;
 
 public static class MigrationExtension
 {

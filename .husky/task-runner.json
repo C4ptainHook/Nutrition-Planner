@@ -4,7 +4,12 @@
     {
       "name": "dotnet-format-staged",
       "command": "dotnet",
-      "args": ["format", "src/NutritionPlanner.sln", "--include", "${staged}"],
+      "args": [
+        "format",
+        "server/src/NutritionPlanner.sln",
+        "--include",
+        "${staged}"
+      ],
       "include": ["**/*.cs"]
     }
   ]
