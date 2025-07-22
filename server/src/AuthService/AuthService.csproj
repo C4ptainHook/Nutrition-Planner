@@ -20,5 +20,6 @@
         <PackageReference Include="OpenIddict.Validation.AspNetCore" Version="7.0.0" />
         <PackageReference Include="Riok.Mapperly" Version="4.3.0-next.2" />
         <PackageReference Include="Scalar.AspNetCore" Version="2.5.3" />
+        <PackageReference Include="System.Linq.Async" Version="6.0.3" />
     </ItemGroup>
 </Project>

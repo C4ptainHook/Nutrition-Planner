@@ -1,3 +1,4 @@
+using AuthService.Authorization;
 using AuthService.Data;
 using AuthService.Data.Extensions;
 using AuthService.Identity;
@@ -53,6 +54,8 @@ builder.Services.AddScoped<
     IUserClaimsPrincipalFactory<ApplicationUser>,
     ApplicationClaimsPrincipalFactory
 >();
+
+builder.Services.AddScoped<AuthorizationHelper>();
 
 builder.Services.AddAuthentication().AddCookie(CookieAuthenticationDefaults.AuthenticationScheme);
 builder.Services.AddAuthorization();
