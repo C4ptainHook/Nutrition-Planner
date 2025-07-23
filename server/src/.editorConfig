@@ -19,6 +19,25 @@ csharp_style_var_for_built_in_types = true
 csharp_style_var_when_type_is_apparent = true
 csharp_style_prefer_primary_constructors = false
 
+[*.razor]
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Razor formatting options (Visual Studio / Roslyn-based)
+csharp_indent_case_contents = true
+csharp_indent_switch_labels = true
+csharp_indent_labels = one_less_than_current
+csharp_new_line_before_open_brace = all
+
+# Razor-specific analyzers (if applicable)
+dotnet_diagnostic.ASP0001.severity = none
+
+[*.{cshtml,razor,html}]
+indent_style = space
+indent_size = 4
+
 [*.{cs,vb}]
 dotnet_diagnostic.CA1707.severity = none
 dotnet_diagnostic.CA1848.severity = none
