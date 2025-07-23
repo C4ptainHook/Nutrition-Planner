@@ -1,0 +1,53 @@
+@page "/Consent"
+
+@attribute [Authorize]
+
+@inject IHttpContextAccessor HttpContextAccessor
+@inject NavigationManager NavigationManager
+
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Authentication.Cookies
+@using AuthService.Enums
+@using AuthService.Identity
+@using Microsoft.AspNetCore.Authorization
+
+
+<h3>Consent</h3>
+<p>Do you grant this application access to your details?</p>
+
+<div>
+    <button class="btn btn-primary" @onclick="HandleGrantAsync">Allow</button>
+    <button class="btn btn-secondary" @onclick="HandleDenyAsync">Deny</button>
+</div>
+
+
+@code {
+    [SupplyParameterFromQuery]
+    public string? ReturnUrl { get; set; }
+    private async Task HandleGrantAsync()
+    {
+        var httpContext = HttpContextAccessor.HttpContext;
+        
+        if (httpContext is null)
+        {
+
+            return;
+        }
+        var user = httpContext.User;
+        if (user.Identity is not ClaimsIdentity identity)
+        {
+
+            return;
+        }
+        identity.AddClaim(new Claim(AppClaimTypes.Consent, ConsentDecision.Grant.ToString()));
+        var updatedPrincipal = new ClaimsPrincipal(identity);
+        await httpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, updatedPrincipal);
+        NavigationManager.NavigateTo(ReturnUrl ?? "/", forceLoad: true);
+    }
+
+    private void HandleDenyAsync()
+    {
+        NavigationManager.NavigateTo(ReturnUrl ?? "/", forceLoad: true);
+    }
+}

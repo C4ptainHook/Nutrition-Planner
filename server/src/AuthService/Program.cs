@@ -1,4 +1,5 @@
 using AuthService.Authorization;
+using AuthService.Components;
 using AuthService.Data;
 using AuthService.Data.Extensions;
 using AuthService.Identity;
@@ -10,7 +11,7 @@ using Scalar.AspNetCore;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddRazorPages();
+builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<AuthDbContext>(options =>
 {
@@ -72,6 +73,7 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseMigration();
-app.MapRazorPages();
+app.UseAntiforgery();
+app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 app.MapControllers();
 app.Run();
