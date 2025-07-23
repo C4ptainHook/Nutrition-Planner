@@ -1,0 +1,17 @@
+@page "/Consent"
+@using AuthService.Enums
+@model AuthService.Pages.ConsentModel
+@{
+    ViewData["Title"] = "Consent";
+}
+
+<h1>@ViewData["Title"]</h1>
+<p>Do you grant this application access to your details?</p>
+
+<div>
+    <form method="post">
+        <input type="hidden" name="returnUrl" value="@Model.ReturnUrl" />
+        <button type="submit" name="decision" value="@ConsentDecision.Grant">Allow</button>
+        <button type="submit" name="decision" value="@ConsentDecision.Deny">Deny</button>
+    </form>
+</div>

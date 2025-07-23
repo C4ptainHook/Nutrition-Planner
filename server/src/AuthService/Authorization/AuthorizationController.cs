@@ -16,18 +16,16 @@ using static OpenIddict.Abstractions.OpenIddictConstants;
 
 namespace AuthService.Authorization;
 
+[ApiController]
 public class AuthorizationController : Controller
 {
     private readonly IOpenIddictApplicationManager _applicationManager;
-    private readonly IOpenIddictAuthorizationManager _authorizationManager;
     private readonly IOpenIddictScopeManager _scopeManager;
-    private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly AuthorizationHelper _authService;
 
     public AuthorizationController(
         IOpenIddictApplicationManager applicationManager,
-        IOpenIddictAuthorizationManager authorizationManager,
         IOpenIddictScopeManager scopeManager,
         SignInManager<ApplicationUser> signInManager,
         UserManager<ApplicationUser> userManager,
@@ -35,11 +33,9 @@ public class AuthorizationController : Controller
     )
     {
         _applicationManager = applicationManager;
-        _authorizationManager = authorizationManager;
         _scopeManager = scopeManager;
-        _signInManager = signInManager;
-        _userManager = userManager;
         _authService = authHelper;
+        _userManager = userManager;
     }
 
     [HttpGet("~/connect/authorize")]
@@ -101,19 +97,6 @@ public class AuthorizationController : Controller
             );
         }
 
-        if (request.HasPromptValue(PromptValues.Login))
-        {
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-
-            return Challenge(
-                properties: new AuthenticationProperties
-                {
-                    RedirectUri = _authService.BuildRedirectUrl(HttpContext.Request, parameters),
-                },
-                [CookieAuthenticationDefaults.AuthenticationScheme]
-            );
-        }
-
         var consentClaim = result.Principal!.GetClaim(AppClaimTypes.Consent);
         if (
             consentClaim != ConsentDecision.Grant.ToString()
@@ -129,19 +112,31 @@ public class AuthorizationController : Controller
 
             return Redirect(consentRedirectUrl);
         }
-        var userId = result.Principal!.FindFirst(ClaimTypes.Email)!.Value;
 
+        var user = await _userManager.GetUserAsync(result.Principal!);
+        if (user == null)
+        {
+            return Forbid(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+        }
         var identity = new ClaimsIdentity(
             authenticationType: TokenValidationParameters.DefaultAuthenticationType,
             nameType: Claims.Name,
             roleType: Claims.Role
         );
 
-        identity
-            .SetClaim(Claims.Subject, userId)
-            .SetClaim(Claims.Email, userId)
-            .SetClaim(Claims.Name, userId)
-            .SetClaims(Claims.Role, new List<string> { "user", "admin" }.ToImmutableArray());
+        identity.SetClaim(Claims.Subject, await _userManager.GetUserIdAsync(user));
+
+        identity.SetClaim(Claims.Email, await _userManager.GetEmailAsync(user));
+
+        identity.SetClaim(Claims.Name, await _userManager.GetUserNameAsync(user));
+
+        var userRoles = await _userManager.GetRolesAsync(user);
+        identity.SetClaims(Claims.Role, userRoles.ToImmutableArray());
+
+        if (!string.IsNullOrEmpty(user.Nickname))
+        {
+            identity.SetClaim("nickname", user.Nickname);
+        }
 
         identity.SetScopes(request.GetScopes());
         identity.SetResources(

@@ -10,7 +10,7 @@ using Scalar.AspNetCore;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.Services.AddRazorPages();
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<AuthDbContext>(options =>
 {
@@ -72,5 +72,6 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseMigration();
+app.MapRazorPages();
 app.MapControllers();
 app.Run();
