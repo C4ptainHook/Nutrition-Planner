@@ -1,3 +1,4 @@
+using AuthService;
 using AuthService.Authorization;
 using AuthService.Components;
 using AuthService.Data;
@@ -12,6 +13,7 @@ using static OpenIddict.Abstractions.OpenIddictConstants;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
+builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<AuthDbContext>(options =>
 {
@@ -55,6 +57,8 @@ builder.Services.AddScoped<
     IUserClaimsPrincipalFactory<ApplicationUser>,
     ApplicationClaimsPrincipalFactory
 >();
+
+builder.Services.AddHostedService<ClientSeeder>();
 
 builder.Services.AddScoped<AuthorizationHelper>();
 
