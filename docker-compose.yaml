@@ -1,0 +1,17 @@
+name: nutrition-planner
+services:
+  authdb:
+    image: postgres
+    restart: always
+    container_name: authdb
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=1234
+      - POSTGRES_DB=NutritionPlannerAuth
+    ports:
+      - "5433:5432"
+    volumes:
+      - authdb_data:/var/lib/postgresql/data
+
+volumes:
+  authdb_data:
