@@ -1,18 +1,27 @@
 using AuthService;
 using AuthService.Authorization;
-using AuthService.Components;
 using AuthService.Data;
 using AuthService.Data.Extensions;
 using AuthService.Identity;
 using AuthService.Models;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddRazorComponents().AddInteractiveServerComponents();
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:5173")
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
+});
+
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<AuthDbContext>(options =>
@@ -25,7 +34,30 @@ builder
     {
         options.User.RequireUniqueEmail = true;
     })
-    .AddEntityFrameworkStores<AuthDbContext>();
+    .AddEntityFrameworkStores<AuthDbContext>()
+    .AddDefaultTokenProviders();
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Events.OnRedirectToLogin = context =>
+    {
+        var clientLoginUrl = "http://localhost:5173/login";
+        var redirectUrl = $"{clientLoginUrl}?returnUrl={Uri.EscapeDataString(context.RedirectUri)}";
+
+        context.Response.Redirect(redirectUrl);
+        return Task.CompletedTask;
+    };
+
+    options.Events.OnRedirectToAccessDenied = context =>
+    {
+        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+        return Task.CompletedTask;
+    };
+
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    options.Cookie.SameSite = SameSiteMode.None;
+});
 
 builder
     .Services.AddOpenIddict()
@@ -41,7 +73,7 @@ builder
             .SetTokenEndpointUris("connect/token")
             .SetUserInfoEndpointUris("connect/userinfo");
 
-        options.RegisterScopes(Scopes.Email, Scopes.Profile, Scopes.Roles);
+        options.RegisterScopes(Scopes.Email, Scopes.Profile, Scopes.Roles, "api1");
 
         options.AllowAuthorizationCodeFlow().AllowRefreshTokenFlow();
         options.AddDevelopmentEncryptionCertificate().AddDevelopmentSigningCertificate();
@@ -53,16 +85,13 @@ builder
             .EnableTokenEndpointPassthrough();
     });
 
+builder.Services.AddHostedService<ClientSeeder>();
+builder.Services.AddScoped<AuthorizationHelper>();
 builder.Services.AddScoped<
     IUserClaimsPrincipalFactory<ApplicationUser>,
     ApplicationClaimsPrincipalFactory
 >();
 
-builder.Services.AddHostedService<ClientSeeder>();
-
-builder.Services.AddScoped<AuthorizationHelper>();
-
-builder.Services.AddAuthentication().AddCookie(CookieAuthenticationDefaults.AuthenticationScheme);
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
@@ -74,10 +103,9 @@ if (app.Environment.IsDevelopment())
 }
 app.UseHttpsRedirection();
 
+app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseMigration();
-app.UseAntiforgery();
-app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 app.MapControllers();
 app.Run();

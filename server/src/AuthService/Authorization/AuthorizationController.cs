@@ -6,7 +6,6 @@ using AuthService.Identity;
 using AuthService.Models;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -18,7 +17,7 @@ using static OpenIddict.Abstractions.OpenIddictConstants;
 namespace AuthService.Authorization;
 
 [ApiController]
-public class AuthorizationController : Controller
+public class AuthorizationController : ControllerBase
 {
     private readonly IOpenIddictApplicationManager _applicationManager;
     private readonly IOpenIddictScopeManager _scopeManager;
@@ -72,9 +71,7 @@ public class AuthorizationController : Controller
             );
         }
 
-        var result = await HttpContext.AuthenticateAsync(
-            CookieAuthenticationDefaults.AuthenticationScheme
-        );
+        var result = await HttpContext.AuthenticateAsync(IdentityConstants.ApplicationScheme);
         var parameters = _authService.ParseOAuthParameters(HttpContext, [Parameters.Prompt]);
         if (!_authService.IsAuthenticated(result, request))
         {
@@ -83,20 +80,20 @@ public class AuthorizationController : Controller
                 {
                     RedirectUri = _authService.BuildRedirectUrl(HttpContext.Request, parameters),
                 },
-                [CookieAuthenticationDefaults.AuthenticationScheme]
+                [IdentityConstants.ApplicationScheme]
             );
         }
 
         if (request.HasPromptValue(PromptValues.Login))
         {
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            await HttpContext.SignOutAsync(IdentityConstants.ApplicationScheme);
 
             return Challenge(
                 properties: new AuthenticationProperties
                 {
                     RedirectUri = _authService.BuildRedirectUrl(HttpContext.Request, parameters),
                 },
-                [CookieAuthenticationDefaults.AuthenticationScheme]
+                [IdentityConstants.ApplicationScheme]
             );
         }
 
@@ -106,14 +103,13 @@ public class AuthorizationController : Controller
             || request.HasPromptValue(PromptValues.Consent)
         )
         {
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-
-            var returnUrl = HttpUtility.UrlEncode(
-                _authService.BuildRedirectUrl(HttpContext.Request, parameters)
+            var returnUrl = _authService.BuildRedirectUrl(
+                HttpContext.Request,
+                _authService.ParseOAuthParameters(HttpContext)
             );
-            var consentRedirectUrl = $"/Consent?returnUrl={returnUrl}";
-
-            return Redirect(consentRedirectUrl);
+            var clientConsentUrl = "http://localhost:5173/consent";
+            var redirectUrl = $"{clientConsentUrl}?returnUrl={Uri.EscapeDataString(returnUrl)}";
+            return Redirect(redirectUrl);
         }
 
         var user = await _userManager.GetUserAsync(result.Principal!);
@@ -168,8 +164,8 @@ public class AuthorizationController : Controller
             OpenIddictServerAspNetCoreDefaults.AuthenticationScheme
         );
 
-        var user = await _userManager.GetUserAsync(result.Principal!);
-        if (user == null)
+        var userId = result.Principal!.GetClaim(Claims.Subject);
+        if (string.IsNullOrEmpty(userId))
         {
             return Forbid(
                 authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
@@ -179,11 +175,29 @@ public class AuthorizationController : Controller
                         [OpenIddictServerAspNetCoreConstants.Properties.Error] =
                             Errors.InvalidGrant,
                         [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] =
-                            "Cannot find user from the token.",
+                            "The authorization code is invalid or has expired.",
                     }
                 )
             );
         }
+
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user is null)
+        {
+            return Forbid(
+                authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
+                properties: new AuthenticationProperties(
+                    new Dictionary<string, string?>
+                    {
+                        [OpenIddictServerAspNetCoreConstants.Properties.Error] =
+                            Errors.InvalidGrant,
+                        [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] =
+                            "The user associated with the authorization code no longer exists.",
+                    }
+                )
+            );
+        }
+
         var identity = new ClaimsIdentity(
             authenticationType: TokenValidationParameters.DefaultAuthenticationType,
             nameType: Claims.Name,
@@ -193,6 +207,7 @@ public class AuthorizationController : Controller
         identity.SetClaim(Claims.Subject, await _userManager.GetUserIdAsync(user));
         identity.SetClaim(Claims.Email, await _userManager.GetEmailAsync(user));
         identity.SetClaim(Claims.Name, await _userManager.GetUserNameAsync(user));
+
         var userRoles = await _userManager.GetRolesAsync(user);
         identity.SetClaims(Claims.Role, userRoles.ToImmutableArray());
 
@@ -201,11 +216,17 @@ public class AuthorizationController : Controller
             identity.SetClaim("nickname", user.Nickname);
         }
 
-        identity.SetScopes(request.GetScopes());
+        identity.SetClaim(
+            "AspNet.Identity.SecurityStamp",
+            await _userManager.GetSecurityStampAsync(user)
+        );
+
+        identity.SetScopes(result.Principal!.GetScopes());
         identity.SetResources(
             await _scopeManager.ListResourcesAsync(identity.GetScopes()).ToListAsync()
         );
-        identity.SetDestinations(c => AuthorizationHelper.GetDestinations(identity, c));
+        identity.SetDestinations(claim => AuthorizationHelper.GetDestinations(identity, claim));
+
         return SignIn(
             new ClaimsPrincipal(identity),
             OpenIddictServerAspNetCoreDefaults.AuthenticationScheme
@@ -256,6 +277,41 @@ public class AuthorizationController : Controller
         }
 
         return Ok(claims);
+    }
+
+    [HttpPost("~/connect/consent")]
+    [IgnoreAntiforgeryToken]
+    public async Task<IActionResult> Consent(
+        [FromForm] string decision,
+        [FromForm] string returnUrl
+    )
+    {
+        var result = await HttpContext.AuthenticateAsync(IdentityConstants.ApplicationScheme);
+        if (!result.Succeeded || result.Principal?.Identity is not ClaimsIdentity identity)
+        {
+            return BadRequest(
+                "Your session has expired. Please close this window and try logging in again."
+            );
+        }
+        if (decision != "grant")
+        {
+            return Redirect("http://localhost:5173/access-denied");
+        }
+        var consentClaim = identity.FindFirst(AppClaimTypes.Consent);
+        if (consentClaim is not null)
+        {
+            identity.RemoveClaim(consentClaim);
+        }
+
+        identity.AddClaim(new Claim(AppClaimTypes.Consent, ConsentDecision.Grant.ToString()));
+        var newPrincipal = new ClaimsPrincipal(identity);
+        await HttpContext.SignInAsync(
+            IdentityConstants.ApplicationScheme,
+            newPrincipal,
+            result.Properties
+        );
+
+        return LocalRedirect(returnUrl);
     }
 
     [HttpGet("~/connect/logout")]

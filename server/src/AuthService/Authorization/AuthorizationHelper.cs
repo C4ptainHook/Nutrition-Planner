@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Primitives;
 using OpenIddict.Abstractions;
+using static OpenIddict.Abstractions.OpenIddictConstants;
 
 namespace AuthService.Authorization;
 
@@ -51,12 +52,48 @@ public class AuthorizationHelper
     public static List<string> GetDestinations(ClaimsIdentity identity, Claim claim)
     {
         var destinations = new List<string>();
-
-        if (claim.Type is OpenIddictConstants.Claims.Name or OpenIddictConstants.Claims.Email)
+        switch (claim.Type)
         {
-            destinations.Add(OpenIddictConstants.Destinations.AccessToken);
-        }
+            case Claims.Name:
+                destinations.Add(Destinations.AccessToken);
+                if (identity.HasScope(Scopes.Profile))
+                {
+                    destinations.Add(Destinations.IdentityToken);
+                }
+                break;
 
+            case Claims.Email:
+                destinations.Add(Destinations.AccessToken);
+                if (identity.HasScope(Scopes.Email))
+                {
+                    destinations.Add(Destinations.IdentityToken);
+                }
+                break;
+
+            case Claims.Role:
+                destinations.Add(Destinations.AccessToken);
+                if (identity.HasScope(Scopes.Roles))
+                {
+                    destinations.Add(Destinations.IdentityToken);
+                }
+                break;
+
+            case Claims.Subject:
+                destinations.Add(Destinations.AccessToken);
+                destinations.Add(Destinations.IdentityToken);
+                break;
+
+            case "nickname":
+                destinations.Add(Destinations.AccessToken);
+                if (identity.HasScope(Scopes.Profile))
+                {
+                    destinations.Add(Destinations.IdentityToken);
+                }
+                break;
+
+            default:
+                break;
+        }
         return destinations;
     }
 
