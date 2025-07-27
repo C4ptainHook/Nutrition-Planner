@@ -1,9 +1,9 @@
-using AuthService;
 using AuthService.Authorization;
 using AuthService.Data;
 using AuthService.Data.Extensions;
 using AuthService.Identity;
 using AuthService.Models;
+using AuthService.Seeders;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
@@ -48,12 +48,6 @@ builder.Services.ConfigureApplicationCookie(options =>
         return Task.CompletedTask;
     };
 
-    options.Events.OnRedirectToAccessDenied = context =>
-    {
-        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-        return Task.CompletedTask;
-    };
-
     options.Cookie.HttpOnly = true;
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
     options.Cookie.SameSite = SameSiteMode.None;
@@ -73,7 +67,7 @@ builder
             .SetTokenEndpointUris("connect/token")
             .SetUserInfoEndpointUris("connect/userinfo");
 
-        options.RegisterScopes(Scopes.Email, Scopes.Profile, Scopes.Roles, "api1");
+        options.RegisterScopes(Scopes.OpenId, Scopes.Email, Scopes.Profile, Scopes.Roles, "api1");
 
         options.AllowAuthorizationCodeFlow().AllowRefreshTokenFlow();
         options.AddDevelopmentEncryptionCertificate().AddDevelopmentSigningCertificate();
@@ -86,6 +80,7 @@ builder
     });
 
 builder.Services.AddHostedService<ClientSeeder>();
+builder.Services.AddHostedService<RoleSeeder>();
 builder.Services.AddScoped<AuthorizationHelper>();
 builder.Services.AddScoped<
     IUserClaimsPrincipalFactory<ApplicationUser>,
