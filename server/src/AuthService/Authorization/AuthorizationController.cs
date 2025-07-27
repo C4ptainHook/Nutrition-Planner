@@ -295,7 +295,7 @@ public class AuthorizationController : ControllerBase
         }
         if (decision != "grant")
         {
-            return Redirect("http://localhost:5173/access-denied");
+            return Redirect("http://localhost:5173/access-denied"); // TODO: add access denied page
         }
         var consentClaim = identity.FindFirst(AppClaimTypes.Consent);
         if (consentClaim is not null)

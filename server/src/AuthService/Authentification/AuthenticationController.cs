@@ -34,7 +34,7 @@ public class AuthenticationController : Controller
         {
             return BadRequest(result.Errors.Select(e => e.Description));
         }
-        await _userManager.AddToRoleAsync(user, "user");
+        await _userManager.AddToRoleAsync(user, "guest");
         return CreatedAtAction(nameof(Register), new { email = user.Email });
     }
 

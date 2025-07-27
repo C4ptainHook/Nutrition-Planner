@@ -43,7 +43,7 @@ public class ClientSeeder : BackgroundService
                         Permissions.Scopes.Roles,
                         "api1",
                     },
-                    Requirements = { Requirements.Features.ProofKeyForCodeExchange },
+                    Requirements = { Requirements.Features.ProofKeyForCodeExchange }, //TODO: add PKCE generation
                 },
                 cancellationToken
             );
