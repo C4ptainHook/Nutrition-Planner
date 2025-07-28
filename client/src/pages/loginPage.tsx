@@ -11,7 +11,6 @@ const LoginPage = () => {
     const params = new URLSearchParams(location.search);
     const url = params.get("returnUrl");
     if (url) {
-      console.log("Redirecting back to:", url);
       setReturnUrl(url);
     }
   }, [location]);

@@ -69,7 +69,7 @@ builder
             .SetTokenEndpointUris("connect/token")
             .SetUserInfoEndpointUris("connect/userinfo");
 
-        options.RegisterScopes(Scopes.OpenId, Scopes.Email, Scopes.Profile, Scopes.Roles, "api1");
+        options.RegisterScopes(Scopes.OpenId, Scopes.Email, Scopes.Profile, Scopes.Roles);
 
         options.AllowAuthorizationCodeFlow().AllowRefreshTokenFlow();
         options.AddDevelopmentEncryptionCertificate().AddDevelopmentSigningCertificate();
