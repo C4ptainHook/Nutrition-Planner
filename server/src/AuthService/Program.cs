@@ -6,7 +6,6 @@ using AuthService.Models;
 using AuthService.Seeders;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Polly;
 using Scalar.AspNetCore;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
@@ -16,7 +15,7 @@ builder.Services.AddCors(options =>
     options.AddDefaultPolicy(policy =>
     {
         policy
-            .WithOrigins("http://localhost:5173")
+            .WithOrigins(builder.Configuration["ClientSettings:RootUrl"]!)
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
@@ -42,10 +41,10 @@ builder.Services.ConfigureApplicationCookie(options =>
 {
     options.Events.OnRedirectToLogin = context =>
     {
-        var clientLoginUrl = "http://localhost:5173/login";
-        var serverUrl = context.Request.Scheme + "://" + context.Request.Host;
+        var clientLoginUrl = $"{builder.Configuration["ClientSettings:RootUrl"]}/login";
+        var serverUrl = $"{context.Request.Scheme}://{context.Request.Host}";
         context.Response.Redirect(
-            $"{clientLoginUrl}?returnUrl={serverUrl + Uri.EscapeDataString(context.Properties.RedirectUri ?? "/")}"
+            $"{clientLoginUrl}?returnUrl={serverUrl}{Uri.EscapeDataString(context.Properties.RedirectUri ?? "/")}"
         );
         return Task.CompletedTask;
     };
