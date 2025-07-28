@@ -215,11 +215,6 @@ public class AuthorizationController : ControllerBase
             identity.SetClaim("nickname", user.Nickname);
         }
 
-        identity.SetClaim(
-            "AspNet.Identity.SecurityStamp",
-            await _userManager.GetSecurityStampAsync(user)
-        );
-
         identity.SetScopes(result.Principal!.GetScopes());
         identity.SetResources(
             await _scopeManager.ListResourcesAsync(identity.GetScopes()).ToListAsync()
@@ -294,7 +289,7 @@ public class AuthorizationController : ControllerBase
         }
         if (decision != "grant")
         {
-            return Redirect("http://localhost:5173/access-denied"); // TODO: add access denied page
+            return Redirect("http://localhost:5173/access-denied");
         }
         var consentClaim = identity.FindFirst(AppClaimTypes.Consent);
         if (consentClaim is not null)
