@@ -6,6 +6,7 @@ using AuthService.Models;
 using AuthService.Seeders;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Polly;
 using Scalar.AspNetCore;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
@@ -42,9 +43,10 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.Events.OnRedirectToLogin = context =>
     {
         var clientLoginUrl = "http://localhost:5173/login";
-        var redirectUrl = $"{clientLoginUrl}?returnUrl={Uri.EscapeDataString(context.RedirectUri)}";
-
-        context.Response.Redirect(redirectUrl);
+        var serverUrl = context.Request.Scheme + "://" + context.Request.Host;
+        context.Response.Redirect(
+            $"{clientLoginUrl}?returnUrl={serverUrl + Uri.EscapeDataString(context.Properties.RedirectUri ?? "/")}"
+        );
         return Task.CompletedTask;
     };
 

@@ -1,6 +1,5 @@
 using System.Collections.Immutable;
 using System.Security.Claims;
-using System.Web;
 using AuthService.Enums;
 using AuthService.Identity;
 using AuthService.Models;
