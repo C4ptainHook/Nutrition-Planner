@@ -1,7 +1,6 @@
-import "./App.css";
 import { Route, Routes } from "react-router";
 import HomePage from "./pages/homePage";
-import LoginPage from "./pages/loginPage";
+import LoginPage from "./pages/login/loginPage";
 import RegistrationPage from "./pages/registrationPage";
 import { OAuthCallback } from "./auth/components/OAuthCallback";
 import ConsentPage from "./pages/consentPage";
