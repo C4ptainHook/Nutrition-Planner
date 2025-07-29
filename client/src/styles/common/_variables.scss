@@ -1,12 +1,13 @@
 @use "sass:color";
 
-$primary-base: hsl(243, 80%, 62%);
+$primary-base: hsl(243, 48%, 9%);
 $text-base: hsl(240, 6%, 10%);
 $error-base: hsl(0, 79%, 63%);
 
 :root {
   --primary-color: #{$primary-base};
   --primary-color-dark: #{color.adjust($primary-base, $lightness: -7%)};
+  --primary-color-light: #{color.adjust($primary-base, $lightness: 20%)};
 
   --text-color: #{$text-base};
   --text-color-light: #{color.adjust($text-base, $lightness: 35%)};

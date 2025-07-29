@@ -45,10 +45,11 @@ const LoginPage = () => {
         <hr />
         {error && <div className={styles.errorMessage}>{error}</div>}
         <div className={styles.formGroup}>
-          <label className={styles.label}>Email</label>
           <input
             type="email"
             value={email}
+            autoComplete="email"
+            placeholder="Email"
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               setEmail(e.target.value)
             }
@@ -57,10 +58,10 @@ const LoginPage = () => {
           />
         </div>
         <div className={styles.formGroup}>
-          <label className={styles.label}>Password</label>
           <input
             type="password"
             value={password}
+            placeholder="Password"
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               setPassword(e.target.value)
             }

@@ -4,7 +4,7 @@ import LoginPage from "./pages/login/loginPage";
 import RegistrationPage from "./pages/registrationPage";
 import { OAuthCallback } from "./auth/components/OAuthCallback";
 import ConsentPage from "./pages/consentPage";
-import AccessDeniedPage from "./pages/accessDeniedPage";
+import AccessDeniedPage from "./pages/accessDenied/accessDeniedPage";
 
 function App() {
   return (
