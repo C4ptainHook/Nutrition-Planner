@@ -1,3 +1,5 @@
+using AuthService.Authentification.Email;
+using AuthService.Authentification.Email.Abstractions;
 using AuthService.Authorization;
 using AuthService.Data;
 using AuthService.Data.Extensions;
@@ -87,6 +89,9 @@ builder.Services.AddScoped<
     IUserClaimsPrincipalFactory<ApplicationUser>,
     ApplicationClaimsPrincipalFactory
 >();
+builder.Services.AddScoped<IEmailComposer, EmailComposer>();
+builder.Services.AddScoped<IEmailSender, EmailSender>();
+builder.Services.AddScoped<IEmailVerificationFactory, EmailVerificationFactory>();
 
 builder.Services.AddAuthorization();
 

@@ -29,11 +29,13 @@ const RegistrationPage = () => {
       const response = await fetch("/api/v1/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, confirmPassword }),
       });
 
       if (response.ok) {
-        navigate("/login");
+        navigate("/login", {
+          state: { message: "Registration successful! Please log in." },
+        });
       } else {
         const errorData = await response.json();
         setError(
