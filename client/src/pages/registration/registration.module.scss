@@ -1,0 +1,12 @@
+@use "../login/login.module.scss";
+
+.submitButton {
+  @extend .submitButton;
+
+  &:disabled {
+    background-color: var(--border-color);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+}

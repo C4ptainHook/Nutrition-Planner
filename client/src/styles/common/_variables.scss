@@ -3,6 +3,8 @@
 $primary-base: hsl(243, 48%, 9%);
 $text-base: hsl(240, 6%, 10%);
 $error-base: hsl(0, 79%, 63%);
+$deny-base: hsl(358, 82%, 60%);
+$accept-base: hsl(64, 66%, 60%);
 
 :root {
   --primary-color: #{$primary-base};

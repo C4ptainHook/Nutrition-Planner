@@ -1,0 +1,76 @@
+.pageContainer {
+  background-color: var(--background-color);
+  min-height: 100vh;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-3) var(--spacing-5);
+  background-color: var(--white);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  width: 100%;
+}
+
+.logo a {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--text-color);
+  text-decoration: none;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+}
+
+.baseButton {
+  padding: var(--spacing-2) var(--spacing-4);
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.loginButton {
+  @extend .baseButton;
+  background-color: transparent;
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.signupButton {
+  @extend .baseButton;
+  background-color: var(--primary-color);
+  color: var(--white);
+}
+
+.logoutButton {
+  @extend .baseButton;
+  background-color: var(--error-color-bg);
+  color: var(--error-color);
+  border-color: var(--error-color-border);
+}
+
+.mainContent {
+  display: flex;
+  justify-content: center;
+  padding: var(--spacing-5);
+  text-align: center;
+}
+
+.welcomeMessage {
+  color: var(--text-color);
+  font-size: 2rem;
+}

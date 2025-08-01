@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import styles from "./registration.module.scss";
 
 const RegistrationPage = () => {
   const [email, setEmail] = useState<string>("");
@@ -28,13 +29,11 @@ const RegistrationPage = () => {
       const response = await fetch("/api/v1/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, confirmPassword }),
+        body: JSON.stringify({ email, password }),
       });
 
       if (response.ok) {
-        navigate("/login", {
-          state: { message: "Registration successful! Please log in." },
-        });
+        navigate("/login");
       } else {
         const errorData = await response.json();
         setError(
@@ -50,49 +49,68 @@ const RegistrationPage = () => {
     }
   };
 
+  const inputErrorClass = error ? styles.inputError : "";
+
   return (
-    <div>
-      <form onSubmit={handleSubmit}>
+    <div className={styles.pageContainer}>
+      <form onSubmit={handleSubmit} className={styles.form} noValidate>
         <h2>Create an Account</h2>
+        <p>Train your Thany</p>
         <hr />
 
-        {error && <p style={{ color: "red" }}>{error}</p>}
+        {error && <div className={styles.errorMessage}>{error}</div>}
 
-        <div>
-          <label>Email</label>
+        <div className={styles.formGroup}>
+          <label htmlFor="email" className={styles.label}>
+            Email
+          </label>
           <input
+            id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            className={`${styles.input} ${inputErrorClass}`}
             required
             autoComplete="email"
           />
         </div>
-        <div>
-          <label>Password</label>
+        <div className={styles.formGroup}>
+          <label htmlFor="password" className={styles.label}>
+            Password
+          </label>
           <input
+            id="password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            className={`${styles.input} ${inputErrorClass}`}
             required
             autoComplete="new-password"
           />
         </div>
-        <div>
-          <label>Confirm Password</label>
+        <div className={styles.formGroup}>
+          <label htmlFor="confirmPassword" className={styles.label}>
+            Confirm Password
+          </label>
           <input
+            id="confirmPassword"
             type="password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
+            className={`${styles.input} ${inputErrorClass}`}
             required
             autoComplete="new-password"
           />
         </div>
-        <button type="submit" disabled={isLoading}>
+        <button
+          type="submit"
+          className={styles.submitButton}
+          disabled={isLoading}
+        >
           {isLoading ? "Registering..." : "Register"}
         </button>
       </form>
-      <p>
+      <p className={styles.registerLink}>
         Already have an account? <Link to="/login">Log In</Link>
       </p>
     </div>

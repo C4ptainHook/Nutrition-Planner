@@ -1,9 +1,9 @@
 import { Route, Routes } from "react-router";
-import HomePage from "./pages/homePage";
+import HomePage from "./pages/home/homePage";
 import LoginPage from "./pages/login/loginPage";
-import RegistrationPage from "./pages/registrationPage";
+import RegistrationPage from "./pages/registration/registrationPage";
 import { OAuthCallback } from "./auth/components/OAuthCallback";
-import ConsentPage from "./pages/consentPage";
+import ConsentPage from "./pages/consent/consentPage";
 import AccessDeniedPage from "./pages/accessDenied/accessDeniedPage";
 
 function App() {
