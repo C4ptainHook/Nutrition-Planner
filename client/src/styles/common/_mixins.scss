@@ -1,0 +1,21 @@
+@use "./variables";
+@use "sass:color";
+
+@mixin responsive($breakpoint) {
+  @media (min-width: $breakpoint) {
+    @content;
+  }
+}
+
+@mixin buttonStyles($backgroundColor) {
+  background-color: $backgroundColor;
+  border: none;
+
+  &:hover {
+    background-color: color.adjust($backgroundColor, $lightness: 20%);
+  }
+
+  &:focus {
+    box-shadow: 0 0 0 3px color.adjust($backgroundColor, $lightness: -20%);
+  }
+}

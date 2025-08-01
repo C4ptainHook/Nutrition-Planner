@@ -1,0 +1,74 @@
+@use "../../styles/common/mixins" as m;
+@use "../../styles/common/variables" as v;
+
+.pageContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: var(--background-color);
+  padding: var(--spacing-3);
+}
+
+.consentBox {
+  background: var(--white);
+  padding: var(--spacing-5);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 450px;
+  text-align: center;
+}
+
+.title {
+  margin-bottom: var(--spacing-2);
+  color: var(--text-color);
+}
+
+.text {
+  margin-bottom: var(--spacing-4);
+  color: var(--text-color-light);
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid var(--border-color);
+  margin-bottom: var(--spacing-4);
+}
+
+.buttonGroup {
+  display: flex;
+  gap: var(--spacing-3);
+}
+
+.baseButton {
+  flex: 1;
+  padding: var(--spacing-3);
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s ease-in-out;
+}
+
+.acceptButton {
+  @extend .baseButton;
+  @include m.buttonStyles(v.$accept-base);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.denyButton {
+  @extend .baseButton;
+  @include m.buttonStyles(v.$deny-base);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+}

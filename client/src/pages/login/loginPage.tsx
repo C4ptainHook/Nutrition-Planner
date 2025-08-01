@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, Link } from "react-router-dom";
+import styles from "./login.module.scss";
 
 const LoginPage = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [returnUrl, setReturnUrl] = useState<string>("/");
+  const [error, setError] = useState<string | null>(null);
   const location = useLocation();
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    const url = params.get("ReturnUrl");
+    const url = params.get("returnUrl");
     if (url) {
-      console.log("Redirecting back to:", url);
       setReturnUrl(url);
     }
   }, [location]);
@@ -28,46 +29,55 @@ const LoginPage = () => {
       if (response.ok) {
         window.location.href = returnUrl;
       } else {
-        alert("Login failed. Please check your credentials.");
+        setError("Login failed. Please check your credentials.");
       }
     } catch (error) {
       console.error("An error occurred during login", error);
-      alert("An error occurred. See the console for details.");
+      setError("An error occurred. See the console for details.");
     }
   };
 
   return (
-    <div>
-      <form onSubmit={handleSubmit}>
+    <div className={styles.pageContainer}>
+      <form onSubmit={handleSubmit} className={styles.form}>
         <h2>Please Log In</h2>
         <p>You must log in to continue the process.</p>
         <hr />
-        <div>
-          <label>Email</label>
+        {error && <div className={styles.errorMessage}>{error}</div>}
+        <div className={styles.formGroup}>
           <input
             type="email"
             value={email}
+            autoComplete="email"
+            placeholder="Email"
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               setEmail(e.target.value)
             }
+            className={styles.input + (error ? `${styles.inputError}` : "")}
             required
           />
         </div>
-        <div>
-          <label>Password</label>
+        <div className={styles.formGroup}>
           <input
             type="password"
             value={password}
+            placeholder="Password"
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               setPassword(e.target.value)
             }
+            className={styles.input + (error ? `${styles.inputError}` : "")}
             required
           />
         </div>
-        <button type="submit">Submit</button>
+        <button type="submit" className={styles.submitButton}>
+          Submit
+        </button>
       </form>
       <p>
-        Don't have an account? <Link to="/register">Register now</Link>
+        Don't have an account?{" "}
+        <Link className={styles.registerLink} to="/register">
+          Register now
+        </Link>
       </p>
     </div>
   );

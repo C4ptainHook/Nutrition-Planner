@@ -1,6 +1,5 @@
 using System.Collections.Immutable;
 using System.Security.Claims;
-using System.Web;
 using AuthService.Enums;
 using AuthService.Identity;
 using AuthService.Models;
@@ -24,13 +23,15 @@ public class AuthorizationController : ControllerBase
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly AuthorizationHelper _authService;
     private readonly SignInManager<ApplicationUser> _signInManager;
+    private readonly IConfiguration _configuration;
 
     public AuthorizationController(
         IOpenIddictApplicationManager applicationManager,
         IOpenIddictScopeManager scopeManager,
         SignInManager<ApplicationUser> signInManager,
         UserManager<ApplicationUser> userManager,
-        AuthorizationHelper authHelper
+        AuthorizationHelper authHelper,
+        IConfiguration configuration
     )
     {
         _applicationManager = applicationManager;
@@ -38,6 +39,7 @@ public class AuthorizationController : ControllerBase
         _authService = authHelper;
         _userManager = userManager;
         _signInManager = signInManager;
+        _configuration = configuration;
     }
 
     [HttpGet("~/connect/authorize")]
@@ -107,7 +109,7 @@ public class AuthorizationController : ControllerBase
                 HttpContext.Request,
                 _authService.ParseOAuthParameters(HttpContext)
             );
-            var clientConsentUrl = "http://localhost:5173/consent";
+            var clientConsentUrl = $"{_configuration["ClientSettings:RootUrl"]}/consent";
             var redirectUrl = $"{clientConsentUrl}?returnUrl={Uri.EscapeDataString(returnUrl)}";
             return Redirect(redirectUrl);
         }
@@ -216,11 +218,6 @@ public class AuthorizationController : ControllerBase
             identity.SetClaim("nickname", user.Nickname);
         }
 
-        identity.SetClaim(
-            "AspNet.Identity.SecurityStamp",
-            await _userManager.GetSecurityStampAsync(user)
-        );
-
         identity.SetScopes(result.Principal!.GetScopes());
         identity.SetResources(
             await _scopeManager.ListResourcesAsync(identity.GetScopes()).ToListAsync()
@@ -295,7 +292,7 @@ public class AuthorizationController : ControllerBase
         }
         if (decision != "grant")
         {
-            return Redirect("http://localhost:5173/access-denied");
+            return Redirect($"{_configuration["ClientSettings:RootUrl"]}/access-denied");
         }
         var consentClaim = identity.FindFirst(AppClaimTypes.Consent);
         if (consentClaim is not null)

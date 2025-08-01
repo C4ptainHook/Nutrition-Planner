@@ -1,0 +1,33 @@
+@use "sass:color";
+
+$primary-base: hsl(243, 48%, 9%);
+$text-base: hsl(240, 6%, 10%);
+$error-base: hsl(0, 79%, 63%);
+$deny-base: hsl(358, 82%, 60%);
+$accept-base: hsl(64, 66%, 60%);
+
+:root {
+  --primary-color: #{$primary-base};
+  --primary-color-dark: #{color.adjust($primary-base, $lightness: -7%)};
+  --primary-color-light: #{color.adjust($primary-base, $lightness: 20%)};
+
+  --text-color: #{$text-base};
+  --text-color-light: #{color.adjust($text-base, $lightness: 35%)};
+
+  --error-color: #{$error-base};
+  --error-color-bg: #{color.adjust($error-base, $lightness: 38%)};
+  --error-color-border: #{color.adjust($error-base, $lightness: 30%)};
+
+  --background-color: hsl(240, 9%, 96%);
+  --border-color: hsl(240, 6%, 88%);
+  --white: hsl(0, 0%, 100%);
+
+  --spacing-1: 0.25rem;
+  --spacing-2: 0.5rem;
+  --spacing-3: 1rem;
+  --spacing-4: 1.5rem;
+  --spacing-5: 2rem;
+}
+
+$breakpoint-md: 768px;
+$breakpoint-lg: 992px;

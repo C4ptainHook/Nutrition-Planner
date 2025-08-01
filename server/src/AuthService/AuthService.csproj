@@ -6,6 +6,7 @@
         <UserSecretsId>b3e2196b-f23e-43f0-8962-086085be939e</UserSecretsId>
     </PropertyGroup>
     <ItemGroup>
+        <PackageReference Include="MailKit" Version="4.13.0" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="9.0.6" />
         <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.4" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.5" />

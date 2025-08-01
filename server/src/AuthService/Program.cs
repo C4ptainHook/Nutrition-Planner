@@ -1,9 +1,11 @@
-using AuthService;
+using AuthService.Authentification.Email;
+using AuthService.Authentification.Email.Abstractions;
 using AuthService.Authorization;
 using AuthService.Data;
 using AuthService.Data.Extensions;
 using AuthService.Identity;
 using AuthService.Models;
+using AuthService.Seeders;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
@@ -15,7 +17,7 @@ builder.Services.AddCors(options =>
     options.AddDefaultPolicy(policy =>
     {
         policy
-            .WithOrigins("http://localhost:5173")
+            .WithOrigins(builder.Configuration["ClientSettings:RootUrl"]!)
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
@@ -41,16 +43,11 @@ builder.Services.ConfigureApplicationCookie(options =>
 {
     options.Events.OnRedirectToLogin = context =>
     {
-        var clientLoginUrl = "http://localhost:5173/login";
-        var redirectUrl = $"{clientLoginUrl}?returnUrl={Uri.EscapeDataString(context.RedirectUri)}";
-
-        context.Response.Redirect(redirectUrl);
-        return Task.CompletedTask;
-    };
-
-    options.Events.OnRedirectToAccessDenied = context =>
-    {
-        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+        var clientLoginUrl = $"{builder.Configuration["ClientSettings:RootUrl"]}/login";
+        var serverUrl = $"{context.Request.Scheme}://{context.Request.Host}";
+        context.Response.Redirect(
+            $"{clientLoginUrl}?returnUrl={serverUrl}{Uri.EscapeDataString(context.Properties.RedirectUri ?? "/")}"
+        );
         return Task.CompletedTask;
     };
 
@@ -73,7 +70,7 @@ builder
             .SetTokenEndpointUris("connect/token")
             .SetUserInfoEndpointUris("connect/userinfo");
 
-        options.RegisterScopes(Scopes.Email, Scopes.Profile, Scopes.Roles, "api1");
+        options.RegisterScopes(Scopes.OpenId, Scopes.Email, Scopes.Profile, Scopes.Roles);
 
         options.AllowAuthorizationCodeFlow().AllowRefreshTokenFlow();
         options.AddDevelopmentEncryptionCertificate().AddDevelopmentSigningCertificate();
@@ -86,11 +83,15 @@ builder
     });
 
 builder.Services.AddHostedService<ClientSeeder>();
+builder.Services.AddHostedService<RoleSeeder>();
 builder.Services.AddScoped<AuthorizationHelper>();
 builder.Services.AddScoped<
     IUserClaimsPrincipalFactory<ApplicationUser>,
     ApplicationClaimsPrincipalFactory
 >();
+builder.Services.AddScoped<IEmailComposer, EmailComposer>();
+builder.Services.AddScoped<IEmailSender, EmailSender>();
+builder.Services.AddScoped<IEmailVerificationFactory, EmailVerificationFactory>();
 
 builder.Services.AddAuthorization();
 

@@ -1,9 +1,8 @@
 using AuthService.Data;
-using Microsoft.AspNetCore.Identity;
 using OpenIddict.Abstractions;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
-namespace AuthService;
+namespace AuthService.Seeders;
 
 public class ClientSeeder : BackgroundService
 {
@@ -17,18 +16,6 @@ public class ClientSeeder : BackgroundService
 
         var context = scope.ServiceProvider.GetRequiredService<AuthDbContext>();
         await context.Database.EnsureCreatedAsync(cancellationToken);
-
-        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-
-        string[] roleNames = ["admin", "user"];
-        foreach (var roleName in roleNames)
-        {
-            var roleExist = await roleManager.RoleExistsAsync(roleName);
-            if (!roleExist)
-            {
-                await roleManager.CreateAsync(new IdentityRole(roleName));
-            }
-        }
 
         var manager = scope.ServiceProvider.GetRequiredService<IOpenIddictApplicationManager>();
 
@@ -54,7 +41,6 @@ public class ClientSeeder : BackgroundService
                         Permissions.Scopes.Email,
                         Permissions.Scopes.Profile,
                         Permissions.Scopes.Roles,
-                        "api1",
                     },
                     Requirements = { Requirements.Features.ProofKeyForCodeExchange },
                 },
