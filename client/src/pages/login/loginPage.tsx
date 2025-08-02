@@ -69,12 +69,17 @@ const LoginPage = () => {
             required
           />
         </div>
+        <p>
+          <Link className={styles.registerLink} to="/forgot-password">
+            Forgot password?
+          </Link>
+        </p>
         <button type="submit" className={styles.submitButton}>
           Submit
         </button>
       </form>
       <p>
-        Don't have an account?{" "}
+        Don't have an account?
         <Link className={styles.registerLink} to="/register">
           Register now
         </Link>
