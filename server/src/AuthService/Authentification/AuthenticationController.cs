@@ -12,23 +12,23 @@ public class AuthenticationController : Controller
 {
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly UserManager<ApplicationUser> _userManager;
-    private readonly IEmailComposer _emailComposer;
+    private readonly IEmailFactory _emailComposer;
     private readonly IEmailSender _emailSender;
-    private readonly IEmailVerificationFactory _emailVerificationFactory;
+    private readonly IEmailLinkFactory _emailLinkFactory;
 
     public AuthenticationController(
         SignInManager<ApplicationUser> signInManager,
         UserManager<ApplicationUser> userManager,
-        IEmailComposer emailComposer,
+        IEmailFactory emailComposer,
         IEmailSender emailSender,
-        IEmailVerificationFactory emailVerificationFactory
+        IEmailLinkFactory emailLinkFactory
     )
     {
         _signInManager = signInManager;
         _userManager = userManager;
         _emailComposer = emailComposer;
         _emailSender = emailSender;
-        _emailVerificationFactory = emailVerificationFactory;
+        _emailLinkFactory = emailLinkFactory;
     }
 
     [HttpPost("register")]
@@ -45,12 +45,12 @@ public class AuthenticationController : Controller
         {
             return BadRequest(result.Errors.Select(e => e.Description));
         }
-        var confirmationLink = await _emailVerificationFactory.CreateConfirmationLink(user.Email);
+        var confirmationLink = await _emailLinkFactory.CreateConfirmationLink(user.Email);
         var confirmationEmail = _emailComposer.CreateConfirmationEmail(
             user.Email,
             confirmationLink
         );
-        await _emailSender.VerifyEmailAsync(confirmationEmail);
+        await _emailSender.SendEmailAsync(confirmationEmail);
         return CreatedAtAction(nameof(Register), new { email = user.Email });
     }
 
@@ -79,7 +79,7 @@ public class AuthenticationController : Controller
         return Ok();
     }
 
-    [HttpGet("confirm-email", Name = "ConfirmEmail")]
+    [HttpPost("confirm-email", Name = "ConfirmEmail")]
     public async Task<IActionResult> ConfirmEmail(
         [FromQuery] string email,
         [FromQuery] string token
@@ -100,5 +100,44 @@ public class AuthenticationController : Controller
             return BadRequest("Email confirmation failed.");
         }
         return Ok("Email confirmed successfully.");
+    }
+
+    [HttpPost("forgot-password")]
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto model)
+    {
+        var user = await _userManager.FindByEmailAsync(model.Email);
+        if (user is null || !await _userManager.IsEmailConfirmedAsync(user))
+        {
+            return Ok("If an account with this email exists, a password reset code has been sent.");
+        }
+
+        var otp = await _userManager.GeneratePasswordResetTokenAsync(user);
+        var emailMessage = _emailComposer.CreatePasswordResetEmail(model.Email, otp);
+        await _emailSender.SendEmailAsync(emailMessage);
+
+        return Ok("If an account with this email exists, a password reset code has been sent.");
+    }
+
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var user = await _userManager.FindByEmailAsync(model.Email);
+        if (user is null)
+        {
+            return Ok("Your password has been reset successfully.");
+        }
+
+        var result = await _userManager.ResetPasswordAsync(user, model.OtpCode, model.Password);
+
+        if (result.Succeeded)
+        {
+            return Ok("Your password has been reset successfully.");
+        }
+        return BadRequest("Password reset failed. The code may be invalid or expired.");
     }
 }

@@ -1,6 +1,6 @@
 namespace AuthService.Authentification.Email.Abstractions;
 
-public interface IEmailVerificationFactory
+public interface IEmailLinkFactory
 {
     Task<string> CreateConfirmationLink(string email);
 }

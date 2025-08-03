@@ -4,11 +4,11 @@ using Microsoft.AspNetCore.Identity;
 
 namespace AuthService.Authentification.Email;
 
-public class EmailVerificationFactory(
+public class EmailLinkFactory(
     IHttpContextAccessor context,
     UserManager<ApplicationUser> userManager,
     LinkGenerator linkGenerator
-) : IEmailVerificationFactory
+) : IEmailLinkFactory
 {
     public async Task<string> CreateConfirmationLink(string email)
     {
