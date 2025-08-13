@@ -2,7 +2,8 @@ using MimeKit;
 
 namespace AuthService.Authentification.Email.Abstractions;
 
-public interface IEmailComposer
+public interface IEmailFactory
 {
     MimeMessage CreateConfirmationEmail(string email, string confirmationLink);
+    MimeMessage CreatePasswordResetEmail(string email, string otp);
 }

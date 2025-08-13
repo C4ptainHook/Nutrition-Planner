@@ -39,6 +39,11 @@ builder
     .AddEntityFrameworkStores<AuthDbContext>()
     .AddDefaultTokenProviders();
 
+builder.Services.Configure<IdentityOptions>(options =>
+{
+    options.Tokens.PasswordResetTokenProvider = TokenOptions.DefaultEmailProvider;
+});
+
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.Events.OnRedirectToLogin = context =>
@@ -89,9 +94,9 @@ builder.Services.AddScoped<
     IUserClaimsPrincipalFactory<ApplicationUser>,
     ApplicationClaimsPrincipalFactory
 >();
-builder.Services.AddScoped<IEmailComposer, EmailComposer>();
+builder.Services.AddScoped<IEmailFactory, EmailFactory>();
 builder.Services.AddScoped<IEmailSender, EmailSender>();
-builder.Services.AddScoped<IEmailVerificationFactory, EmailVerificationFactory>();
+builder.Services.AddScoped<IEmailLinkFactory, EmailLinkFactory>();
 
 builder.Services.AddAuthorization();
 
